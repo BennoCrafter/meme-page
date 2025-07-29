@@ -38,6 +38,7 @@ function logVisit() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          content: "New visit logged! @everyone",
           embeds: [
             {
               title: "New Visit Logged",
