@@ -5,13 +5,13 @@ import "./App.css";
 // Load JSONBin config from env
 const BIN_ID = import.meta.env.VITE_JSONBIN_ID;
 const API_KEY = import.meta.env.VITE_JSONBIN_MASTER_KEY;
+const DISCORD_WEBHOOK_URL = import.meta.env.VITE_DISCORD_WEBHOOK;
 
 function logVisit() {
   const STORAGE_KEY = "app_userId";
   const ACTION = "ralf schuhmacherd";
   const THROTTLE_MS = 5 * 60 * 1000; // 5 minutes
 
-  // get or create a stable user ID in localStorage
   const getOrCreateUserId = () => {
     let id = localStorage.getItem(STORAGE_KEY);
     if (!id) {
@@ -26,7 +26,6 @@ function logVisit() {
     return id;
   };
 
-  // fetch current log, update the per-user bucket, then PUT back
   async function updateLog(visit: {
     userId: string;
     timestamp: string;
@@ -35,42 +34,27 @@ function logVisit() {
     userAgent: string;
   }) {
     try {
-      const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
-        headers: { "X-Master-Key": API_KEY },
-      });
-      const { record } = await res.json();
-
-      // ensure our new structure exists
-      const log = {
-        visitsByUser: {},
-        ...record,
-      };
-
-      const userBucket = log.visitsByUser[visit.userId] || {
-        count: 0,
-        visits: [],
-      };
-
-      const lastTs = userBucket.visits.slice(-1)[0] || 0;
-      if (
-        new Date(visit.timestamp).getTime() - new Date(lastTs).getTime() <
-        THROTTLE_MS
-      ) {
-        // too soon—skip
-        return;
-      }
-
-      userBucket.visits.push(visit.timestamp);
-      userBucket.count++;
-      log.visitsByUser[visit.userId] = userBucket;
-
-      await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
-        method: "PUT",
+      // Send to Discord webhook
+      await fetch(DISCORD_WEBHOOK_URL, {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Master-Key": API_KEY,
         },
-        body: JSON.stringify(log),
+        body: JSON.stringify({
+          embeds: [
+            {
+              title: "New Visit Logged",
+              color: 5814783,
+              fields: [
+                { name: "User ID", value: visit.userId },
+                { name: "Timestamp", value: visit.timestamp },
+                { name: "Page", value: visit.page },
+                { name: "Action", value: visit.action },
+                { name: "User Agent", value: visit.userAgent },
+              ],
+            },
+          ],
+        }),
       });
     } catch (err) {
       console.error("Failed to log visit", err);
