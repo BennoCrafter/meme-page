@@ -1,4 +1,3 @@
-import { useState } from "react";
 import ralfSchuhmacher from "./assets/ralf-schuhmacher.mp4";
 import "./App.css";
 
