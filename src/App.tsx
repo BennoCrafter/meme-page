@@ -27,7 +27,13 @@ function logVisit() {
   };
 
   // fetch current log, update the per-user bucket, then PUT back
-  async function updateLog(visit) {
+  async function updateLog(visit: {
+    userId: string;
+    timestamp: string;
+    action: string;
+    page: string;
+    userAgent: string;
+  }) {
     try {
       const res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
         headers: { "X-Master-Key": API_KEY },
