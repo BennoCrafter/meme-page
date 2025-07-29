@@ -48,7 +48,6 @@ function App() {
             zIndex: 1, // Ensure the video is behind the button initially
           }}
           controls // Keep controls for user interaction (pause, volume, etc.)
-          playsInline // Important for iOS, allows video to play within the browser context
           preload="auto" // Load video metadata and some data at the beginning
         >
           <source src={ralfSchuhmacher} type="video/mp4" />
