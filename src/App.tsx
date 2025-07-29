@@ -3,37 +3,75 @@ import ralfSchuhmacher from "./assets/ralf-schuhmacher.mp4";
 import "./App.css";
 
 function App() {
-  const [showVideo, setShowVideo] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   const handleStart = () => {
-    setShowVideo(true);
+    setHasInteracted(true);
+
     setTimeout(() => {
-      videoRef.current?.play();
-    }, 100); // short delay to ensure video is mounted
+      const videoElement = videoRef.current;
+      if (videoElement) {
+        videoElement.play().catch((error) => {
+          console.error("Error playing video:", error);
+        });
+
+        if (videoElement.requestFullscreen) {
+          videoElement.requestFullscreen().catch((error) => {
+            console.error("Error entering fullscreen:", error);
+          });
+        } else if ((videoElement as any).webkitRequestFullscreen) {
+          /* Safari */
+          (videoElement as any)
+            .webkitRequestFullscreen()
+            .catch((error: any) => {
+              console.error("Error entering fullscreen (Safari):", error);
+            });
+        }
+      }
+    }, 0);
   };
 
   return (
     <>
-      {!showVideo ? (
+      {/* The video element is shown only after the user has interacted */}
+      {hasInteracted && (
+        <video
+          ref={videoRef}
+          style={{
+            position: "fixed", // Position fixed relative to the viewport
+            top: 0,
+            left: 0,
+            width: "100vw", // Take full viewport width
+            height: "100vh", // Take full viewport height
+            objectFit: "cover", // Cover the entire area, cropping if necessary
+            zIndex: 1, // Ensure the video is behind the button initially
+          }}
+          controls // Keep controls for user interaction (pause, volume, etc.)
+          playsInline // Important for iOS, allows video to play within the browser context
+          preload="auto" // Load video metadata and some data at the beginning
+        >
+          <source src={ralfSchuhmacher} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      )}
+
+      {/* The "Teilnehmen" button is shown only before the user interacts */}
+      {!hasInteracted && (
         <button
           onClick={handleStart}
-          style={{ fontSize: "1.2rem", padding: "1rem 2rem" }}
+          style={{
+            position: "fixed", // Position fixed relative to the viewport
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)", // Center the button
+            fontSize: "1.2rem",
+            padding: "1rem 2rem",
+            zIndex: 10, // Ensure the button is above everything
+          }}
         >
           Teilnehmen
         </button>
-      ) : (
-        <div style={{ margin: "2rem 0" }}>
-          <video
-            ref={videoRef}
-            style={{ maxWidth: "100%", height: "auto" }}
-            controls
-            playsInline
-          >
-            <source src={ralfSchuhmacher} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
       )}
     </>
   );
