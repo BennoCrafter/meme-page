@@ -4,7 +4,7 @@ import "./App.css";
 
 function App() {
   const [showVideo, setShowVideo] = useState(false);
-  const videoRef = useRef(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const handleStart = () => {
     setShowVideo(true);
