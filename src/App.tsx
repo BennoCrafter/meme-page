@@ -3,14 +3,11 @@ import ralfSchuhmacher from "./assets/ralf-schuhmacher.mp4";
 import "./App.css";
 
 // Load JSONBin config from env
-const BIN_ID = import.meta.env.VITE_JSONBIN_ID;
-const API_KEY = import.meta.env.VITE_JSONBIN_MASTER_KEY;
 const DISCORD_WEBHOOK_URL = import.meta.env.VITE_DISCORD_WEBHOOK;
 
 function logVisit() {
   const STORAGE_KEY = "app_userId";
   const ACTION = "ralf schuhmacherd";
-  const THROTTLE_MS = 5 * 60 * 1000; // 5 minutes
 
   const getOrCreateUserId = () => {
     let id = localStorage.getItem(STORAGE_KEY);
